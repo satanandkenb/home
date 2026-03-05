@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIS Enterprise Automation Toolkit</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080b12;
+    --deep: #0d1220;
+    --card: #111827;
+    --border: #1e2d45;
+    --accent1: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #7c3aed;
+    --accent4: #10b981;
+    --accent5: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+    animation: orb-drift 20s ease-in-out infinite alternate;
+  }
+  .orb1 { width: 600px; height: 600px; background: var(--accent1); top: -200px; left: -200px; }
+  .orb2 { width: 500px; height: 500px; background: var(--accent3); bottom: -200px; right: -100px; animation-delay: -10s; }
+  .orb3 { width: 400px; height: 400px; background: var(--accent2); top: 40%; left: 50%; animation-delay: -5s; }
+
+  @keyframes orb-drift {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 40px) scale(1.1); }
+  }
+
+  /* Layout */
+  .container { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  header {
+    padding: 60px 24px 40px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-badge {
+    display: inline-block;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.25);
+    color: var(--accent1);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 6px 18px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+  }
+
+  h1 span.hl1 { color: var(--accent1); }
+  h1 span.hl2 { color: var(--accent2); }
+
+  .header-sub {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 680px;
+    margin: 0 auto 48px;
+    line-height: 1.7;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-bottom: 64px;
+    padding: 24px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--accent1);
+    display: block;
+    font-family: var(--mono);
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+
+  /* Nav tabs */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 48px;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    border-radius: 2px;
+  }
+  .tab-btn:hover, .tab-btn.active {
+    border-color: var(--accent1);
+    color: var(--accent1);
+    background: rgba(0,229,255,0.06);
+  }
+  .tab-btn.active { box-shadow: 0 0 12px rgba(0,229,255,0.15); }
+
+  /* Sections */
+  .section { display: none; animation: fadeIn 0.4s ease; }
+  .section.visible { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header {
+    margin-bottom: 32px;
+    padding: 0 24px;
+  }
+
+  .section-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+
+  .section-desc {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* Card Grid */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    padding: 0 24px;
+    margin-bottom: 48px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .card:hover {
+    border-color: var(--card-accent, var(--accent1));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--card-accent, var(--accent1));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .card:hover::before { opacity: 1; }
+
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: white;
+  }
+
+  .card-subtitle {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--card-accent, var(--accent1));
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  .tag.hot { border-color: var(--accent2); color: var(--accent2); }
+  .tag.go { border-color: var(--accent4); color: var(--accent4); }
+  .tag.free { border-color: var(--accent5); color: var(--accent5); }
+
+  /* Learning Path */
+  .roadmap {
+    padding: 0 24px;
+    margin-bottom: 48px;
+  }
+
+  .roadmap-phase {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+    align-items: start;
+  }
+
+  .phase-label {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+    position: relative;
+  }
+
+  .phase-num {
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 700;
+    display: block;
+  }
+
+  .phase-name {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-top: 4px;
+  }
+
+  .phase-duration {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent5);
+    display: block;
+    margin-top: 6px;
+  }
+
+  .phase-content {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+  }
+
+  .phase-content h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: white;
+  }
+
+  .skill-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .skill-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 2px;
+  }
+
+  .skill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Use case flow */
+  .flow-container {
+    padding: 0 24px;
+    margin-bottom: 48px;
+  }
+
+  .flow-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0;
+    margin-bottom: 24px;
+    align-items: center;
+  }
+
+  .flow-step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    text-align: center;
+  }
+
+  .flow-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent1);
+    font-size: 18px;
+    z-index: 2;
+  }
+
+  .flow-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+  .flow-title { font-size: 12px; font-weight: 700; color: white; margin-bottom: 4px; }
+  .flow-tool { font-family: var(--mono); font-size: 10px; color: var(--accent4); }
+
+  .flow-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* Code snippet */
+  .code-block {
+    background: #050810;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin: 16px 0;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 8px; right: 12px;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .code-block code {
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    color: #a8d8ea;
+    white-space: pre;
+  }
+
+  .code-kw { color: #ff6b9d; }
+  .code-fn { color: #00e5ff; }
+  .code-str { color: #a8ff78; }
+  .code-cm { color: #444f6b; }
+
+  /* Big table */
+  .tool-table-wrap {
+    padding: 0 24px;
+    margin-bottom: 48px;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  td {
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  tr:hover td { background: rgba(0,229,255,0.02); }
+
+  .priority-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  /* Highlight row */
+  .row-must td { border-left: 2px solid var(--accent2); }
+  .row-good td { border-left: 2px solid var(--accent4); }
+  .row-nice td { border-left: 2px solid var(--muted); }
+
+  /* Tip box */
+  .tip-box {
+    background: rgba(0,229,255,0.05);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin: 0 24px 32px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .tip-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .tip-text { font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--text); }
+  .tip-text strong { color: var(--accent1); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent1); }
+
+  @media (max-width: 640px) {
+    .roadmap-phase { grid-template-columns: 1fr; }
+    .flow-step::after { display: none; }
+    .stats-bar { gap: 20px; }
+  }
+
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 40px 24px;
+  }
+
+  .pill-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 0 24px;
+    margin-bottom: 24px;
+  }
+
+  .pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid;
+    letter-spacing: 1px;
+  }
+
+  .pill-cyan { border-color: var(--accent1); color: var(--accent1); background: rgba(0,229,255,0.06); }
+  .pill-orange { border-color: var(--accent2); color: var(--accent2); background: rgba(255,107,53,0.06); }
+  .pill-purple { border-color: var(--accent3); color: #a78bfa; background: rgba(124,58,237,0.06); }
+  .pill-green { border-color: var(--accent4); color: var(--accent4); background: rgba(16,185,129,0.06); }
+  .pill-amber { border-color: var(--accent5); color: var(--accent5); background: rgba(245,158,11,0.06); }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<header>
+  <div class="header-badge">MIS Automation Intelligence</div>
+  <h1>Enterprise <span class="hl1">Automation</span><br>Master <span class="hl2">Toolkit</span></h1>
+  <p class="header-sub">The complete technology arsenal for MIS Executives — from bill upload automation to live dashboards. Eliminate 80–90% of manual data entry. Own the decision layer.</p>
+</header>
+
+<div class="stats-bar">
+  <div class="stat"><span class="stat-num">7</span><span class="stat-label">Tech Layers</span></div>
+  <div class="stat"><span class="stat-num">60+</span><span class="stat-label">Tools Covered</span></div>
+  <div class="stat"><span class="stat-num">90%</span><span class="stat-label">Manual Work Cut</span></div>
+  <div class="stat"><span class="stat-num">5</span><span class="stat-label">Automation Phases</span></div>
+  <div class="stat"><span class="stat-num">∞</span><span class="stat-label">ROI Potential</span></div>
+</div>
+
+<!-- NAV -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showSection('languages')">Languages</button>
+  <button class="tab-btn" onclick="showSection('tools')">Tools & Platforms</button>
+  <button class="tab-btn" onclick="showSection('usecases')">Use Cases</button>
+  <button class="tab-btn" onclick="showSection('roadmap')">Learning Roadmap</button>
+  <button class="tab-btn" onclick="showSection('stack')">MIS Stack</button>
+  <button class="tab-btn" onclick="showSection('snippets')">Code Snippets</button>
+</div>
+
+<!-- ============ SECTION: LANGUAGES ============ -->
+<div class="section visible" id="languages">
+  <div class="section-header container">
+    <div class="section-title">🧠 Languages & Their Power</div>
+    <div class="section-desc">// what to learn, what to prioritize, and why</div>
+  </div>
+
+  <div class="card-grid container">
+
+    <div class="card" style="--card-accent: #00e5ff;">
+      <span class="card-icon">🐍</span>
+      <div class="card-subtitle">Must Learn · Priority #1</div>
+      <div class="card-title">Python</div>
+      <div class="card-desc">The king of automation. Handles everything: web scraping, OCR on bills, API calls, Excel manipulation, email automation, PDF parsing, database queries, and building dashboards. One language — total enterprise coverage.</div>
+      <div class="tag-list">
+        <span class="tag hot">🔥 CORE</span>
+        <span class="tag free">FREE</span>
+        <span class="tag">Selenium</span>
+        <span class="tag">Pandas</span>
+        <span class="tag">openpyxl</span>
+        <span class="tag">Playwright</span>
+        <span class="tag">FastAPI</span>
+        <span class="tag">PyMuPDF</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent: #f59e0b;">
+      <span class="card-icon">📊</span>
+      <div class="card-subtitle">Must Learn · Priority #2</div>
+      <div class="card-title">Google Apps Script (GAS)</div>
+      <div class="card-desc">JavaScript-based language that lives inside Google Sheets, Docs, Gmail, and Drive. Automate Sheets with triggers, send emails on data changes, build approval workflows, auto-generate reports — zero server cost.</div>
+      <div class="tag-list">
+        <span class="tag hot">🔥 CORE</span>
+        <span class="tag free">FREE</span>
+        <span class="tag">Triggers</span>
+        <span class="tag">SpreadsheetApp</span>
+        <span class="tag">MailApp</span>
+        <span class="tag">DriveApp</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent: #7c3aed;">
+      <span class="card-icon">💻</span>
+      <div class="card-subtitle">Priority #3</div>
+      <div class="card-title">VBA / Excel Macros</div>
+      <div class="card-desc">If your company runs on Excel, VBA automates it completely. Auto-format reports, build UserForms for data entry, push data between sheets, generate Word/PDF reports from Excel data. Already available — zero extra cost.</div>
+      <div class="tag-list">
+        <span class="tag free">FREE</span>
+        <span class="tag">Macros</span>
+        <span class="tag">UserForms</span>
+        <span class="tag">Excel Objects</span>
+        <span class="tag">Auto Reports</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent: #10b981;">
+      <span class="card-icon">🌐</span>
+      <div class="card-subtitle">Priority #4</div>
+      <div class="card-title">JavaScript / Node.js</div>
+      <div class="card-desc">Build internal web portals, automate browser tasks with Puppeteer/Playwright natively, create REST APIs for your tools, and power live dashboards. Pairs perfectly with Google Apps Script knowledge.</div>
+      <div class="tag-list">
+        <span class="tag free">FREE</span>
+        <span class="tag">Node.js</span>
+        <span class="tag">Puppeteer</span>
+        <span class="tag">Express</span>
+        <span class="tag">React</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent: #ff6b35;">
+      <span class="card-icon">🗄️</span>
+      <div class="card-subtitle">Priority #5 — Essential</div>
+      <div class="card-title">SQL</div>
+      <div class="card-desc">Query any enterprise database. Join data from multiple tables, create views for dashboards, write stored procedures that auto-run reports. Works with MySQL, PostgreSQL, SQLite, MSSQL — every system uses SQL.</div>
+      <div class="tag-list">
+        <span class="tag hot">🔥 CORE</span>
+        <span class="tag free">FREE</span>
+        <span class="tag">SELECT/JOIN</span>
+        <span class="tag">Views</span>
+        <span class="tag">Stored Procs</span>
+        <span class="tag">Triggers</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent: #06b6d4;">
+      <span class="card-icon">🔌</span>
+      <div class="card-subtitle">Priority #6</div>
+      <div class="card-title">Power Query (M Language)</div>
+      <div class="card-desc">Built into Excel and Power BI. Pull data from any source — web, APIs, databases, CSVs — clean it, transform it, and load it into dashboards automatically on refresh. No Python needed for many ETL tasks.</div>
+      <div class="tag-list">
+        <span class="tag free">FREE</span>
+        <span class="tag">ETL</span>
+        <span class="tag">Power BI</span>
+        <span class="tag">Excel</span>
+        <span class="tag">Data Transform</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent: #ec4899;">
+      <span class="card-icon">⚡</span>
+      <div class="card-subtitle">Priority #7</div>
+      <div class="card-title">Power Automate (Low-Code)</div>
+      <div class="card-desc">Microsoft's no-code automation platform. Connect 400+ apps, trigger flows on email/form/data events, auto-approve purchase orders, sync SharePoint with Excel, send Teams alerts — visual drag-and-drop, no coding.</div>
+      <div class="tag-list">
+        <span class="tag">Low Code</span>
+        <span class="tag">Microsoft 365</span>
+        <span class="tag">400+ Connectors</span>
+        <span class="tag">Flows</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent: #64748b;">
+      <span class="card-icon">🤖</span>
+      <div class="card-subtitle">Emerging · Future-Proof</div>
+      <div class="card-title">AI Prompting / LLM APIs</div>
+      <div class="card-desc">Use Claude, GPT, or Gemini APIs to extract data from unstructured text — invoices, emails, vendor messages. Parse bill details, categorize transactions, summarize reports automatically. The new data entry layer.</div>
+      <div class="tag-list">
+        <span class="tag hot">🔥 FUTURE</span>
+        <span class="tag">Claude API</span>
+        <span class="tag">OpenAI</span>
+        <span class="tag">Gemini</span>
+        <span class="tag">OCR + AI</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ SECTION: TOOLS ============ -->
+<div class="section" id="tools">
+  <div class="section-header container">
+    <div class="section-title">🛠️ Tools & Platforms</div>
+    <div class="section-desc">// categorized by automation domain</div>
+  </div>
+
+  <div class="pill-row container">
+    <span class="pill pill-orange">🔥 Must Have</span>
+    <span class="pill pill-green">✅ Recommended</span>
+    <span class="pill pill-cyan">💡 Enterprise Grade</span>
+  </div>
+
+  <div class="tool-table-wrap container">
+    <table>
+      <thead>
+        <tr>
+          <th>Tool / Platform</th>
+          <th>Category</th>
+          <th>What it Automates</th>
+          <th>Priority</th>
+          <th>Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-must">
+          <td><strong>Python + Selenium/Playwright</strong></td>
+          <td>Web Automation</td>
+          <td>Login to any portal, upload bills, download reports, fill forms — fully automated browser control</td>
+          <td><span class="priority-dot" style="background:#ff6b35"></span>MUST</td>
+          <td>Free</td>
+        </tr>
+        <tr class="row-must">
+          <td><strong>Python + Pandas + openpyxl</strong></td>
+          <td>Data Processing</td>
+          <td>Merge Excel files, clean data, auto-generate MIS reports, pivot table automation</td>
+          <td><span class="priority-dot" style="background:#ff6b35"></span>MUST</td>
+          <td>Free</td>
+        </tr>
+        <tr class="row-must">
+          <td><strong>Google Apps Script</strong></td>
+          <td>Spreadsheet Automation</td>
+          <td>Auto-update Google Sheets from forms, send email alerts, build approval workflows, generate PDFs</td>
+          <td><span class="priority-dot" style="background:#ff6b35"></span>MUST</td>
+          <td>Free</td>
+        </tr>
+        <tr class="row-must">
+          <td><strong>Power BI Desktop</strong></td>
+          <td>Dashboards & BI</td>
+          <td>Connect to any data source, build live KPI dashboards, auto-refresh on schedule</td>
+          <td><span class="priority-dot" style="background:#ff6b35"></span>MUST</td>
+          <td>Free/Paid</td>
+        </tr>
+        <tr class="row-must">
+          <td><strong>UiPath / Power Automate</strong></td>
+          <td>RPA Platform</td>
+          <td>GUI-based process automation — clicks, form fill, data entry, file operations</td>
+          <td><span class="priority-dot" style="background:#ff6b35"></span>MUST</td>
+          <td>Free tier</td>
+        </tr>
+        <tr class="row-good">
+          <td><strong>Apache PDFBox / PyMuPDF</strong></td>
+          <td>Document Processing</td>
+          <td>Extract data from PDF invoices/bills, parse tables, convert to structured data</td>
+          <td><span class="priority-dot" style="background:#10b981"></span>HIGH</td>
+          <td>Free</td>
+        </tr>
+        <tr class="row-good">
+          <td><strong>Tesseract OCR + Python</strong></td>
+          <td>OCR / Bill Reading</td>
+          <td>Read scanned bills/invoices, extract vendor name, amount, date from images automatically</td>
+          <td><span class="priority-dot" style="background:#10b981"></span>HIGH</td>
+          <td>Free</td>
+        </tr>
+        <tr class="row-good">
+          <td><strong>Zapier / Make (Integromat)</strong></td>
+          <td>App Integration</td>
+          <td>Connect apps without code — form → Sheets → Email → Slack in one visual workflow</td>
+          <td><span class="priority-dot" style="background:#10b981"></span>HIGH</td>
+          <td>Freemium</td>
+        </tr>
+        <tr class="row-good">
+          <td><strong>Streamlit / Dash (Python)</strong></td>
+          <td>Web Apps / Dashboards</td>
+          <td>Build internal data dashboards with Python in hours — live charts, filters, KPIs</td>
+          <td><span class="priority-dot" style="background:#10b981"></span>HIGH</td>
+          <td>Free</td>
+        </tr>
+        <tr class="row-good">
+          <td><strong>n8n (Self-hosted)</strong></td>
+          <td>Workflow Automation</td>
+          <td>Open-source Zapier alternative — 500+ integrations, host on your own server, no per-task pricing</td>
+          <td><span class="priority-dot" style="background:#10b981"></span>HIGH</td>
+          <td>Free/Self-host</td>
+        </tr>
+        <tr class="row-good">
+          <td><strong>Power Query + Power Pivot</strong></td>
+          <td>ETL in Excel</td>
+          <td>Auto-import from web/API/DB into Excel, transform data, refresh with one click</td>
+          <td><span class="priority-dot" style="background:#10b981"></span>HIGH</td>
+          <td>Free (Excel)</td>
+        </tr>
+        <tr class="row-good">
+          <td><strong>FastAPI / Flask (Python)</strong></td>
+          <td>Backend APIs</td>
+          <td>Build internal REST APIs — receive form data, trigger automation, return processed results</td>
+          <td><span class="priority-dot" style="background:#10b981"></span>HIGH</td>
+          <td>Free</td>
+        </tr>
+        <tr class="row-nice">
+          <td><strong>Tableau Public</strong></td>
+          <td>Data Visualization</td>
+          <td>Enterprise-grade visual analytics with drag-and-drop, share dashboards with management</td>
+          <td><span class="priority-dot" style="background:#64748b"></span>MED</td>
+          <td>Free/Paid</td>
+        </tr>
+        <tr class="row-nice">
+          <td><strong>SQLite / PostgreSQL</strong></td>
+          <td>Database</td>
+          <td>Store operational data locally, run complex queries, power your automation pipeline's data store</td>
+          <td><span class="priority-dot" style="background:#64748b"></span>MED</td>
+          <td>Free</td>
+        </tr>
+        <tr class="row-nice">
+          <td><strong>Claude / GPT API</strong></td>
+          <td>AI / LLM</td>
+          <td>Extract structured data from unstructured invoices, emails, PDFs using AI prompts</td>
+          <td><span class="priority-dot" style="background:#64748b"></span>MED</td>
+          <td>Pay-per-use</td>
+        </tr>
+        <tr class="row-nice">
+          <td><strong>Apache Airflow</strong></td>
+          <td>Workflow Orchestration</td>
+          <td>Schedule and manage complex automation pipelines — run daily MIS jobs in sequence</td>
+          <td><span class="priority-dot" style="background:#64748b"></span>ADV</td>
+          <td>Free</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ SECTION: USE CASES ============ -->
+<div class="section" id="usecases">
+  <div class="section-header container">
+    <div class="section-title">⚙️ Real Enterprise Use Cases</div>
+    <div class="section-desc">// workflows you can build to eliminate manual work</div>
+  </div>
+
+  <div class="flow-container container">
+
+    <div class="flow-label">Use Case 1 — Bill / Invoice Upload Automation</div>
+    <div class="flow-row">
+      <div class="flow-step">
+        <span class="flow-icon">📄</span>
+        <div class="flow-title">Scan / Receive Bill</div>
+        <div class="flow-tool">PDF / Image</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">🔍</span>
+        <div class="flow-title">OCR Extraction</div>
+        <div class="flow-tool">Tesseract + AI</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">🧹</span>
+        <div class="flow-title">Data Cleaning</div>
+        <div class="flow-tool">Python Pandas</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">🌐</span>
+        <div class="flow-title">Auto-Upload to Portal</div>
+        <div class="flow-tool">Selenium/Playwright</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">✅</span>
+        <div class="flow-title">Confirmation Email</div>
+        <div class="flow-tool">Python smtplib</div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="flow-label">Use Case 2 — Live Dashboard from Portal Data</div>
+    <div class="flow-row">
+      <div class="flow-step">
+        <span class="flow-icon">🔐</span>
+        <div class="flow-title">Login to Portal</div>
+        <div class="flow-tool">Selenium</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">⬇️</span>
+        <div class="flow-title">Export / Download Data</div>
+        <div class="flow-tool">Playwright + requests</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">🔄</span>
+        <div class="flow-title">Transform & Store</div>
+        <div class="flow-tool">Pandas + SQLite</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">📊</span>
+        <div class="flow-title">Refresh Dashboard</div>
+        <div class="flow-tool">Power BI / Streamlit</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">📤</span>
+        <div class="flow-title">Email Report to Mgmt</div>
+        <div class="flow-tool">Python + Schedule</div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="flow-label">Use Case 3 — Google Form → Sheets → Approval → ERP Entry</div>
+    <div class="flow-row">
+      <div class="flow-step">
+        <span class="flow-icon">📝</span>
+        <div class="flow-title">Employee Form</div>
+        <div class="flow-tool">Google Forms</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">📋</span>
+        <div class="flow-title">Auto-Log to Sheet</div>
+        <div class="flow-tool">Apps Script</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">📧</span>
+        <div class="flow-title">Approval Email</div>
+        <div class="flow-tool">Apps Script Trigger</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">⚡</span>
+        <div class="flow-title">On Approval → ERP</div>
+        <div class="flow-tool">Python API / RPA</div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">🗄️</span>
+        <div class="flow-title">Update MIS Database</div>
+        <div class="flow-tool">SQL + Python</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card-grid container">
+    <div class="card" style="--card-accent:#00e5ff;">
+      <span class="card-icon">🧾</span>
+      <div class="card-title">GST Portal Automation</div>
+      <div class="card-desc">Auto-login to GST portal, download GSTR reports, compare with purchase register, flag mismatches. Schedule monthly. Zero manual download.</div>
+      <div class="tag-list"><span class="tag hot">HIGH IMPACT</span><span class="tag">Python</span><span class="tag">Selenium</span></div>
+    </div>
+    <div class="card" style="--card-accent:#ff6b35;">
+      <span class="card-icon">📦</span>
+      <div class="card-title">Inventory MIS Auto-Report</div>
+      <div class="card-desc">Pull stock data from ERP/WMS daily, calculate closing stock, reorder levels, slow-movers. Auto-email to purchase team every morning at 9AM.</div>
+      <div class="tag-list"><span class="tag hot">HIGH IMPACT</span><span class="tag">Python</span><span class="tag">SQL</span><span class="tag">Schedule</span></div>
+    </div>
+    <div class="card" style="--card-accent:#10b981;">
+      <span class="card-icon">💰</span>
+      <div class="card-title">Accounts Payable Bot</div>
+      <div class="card-desc">Scan email inbox for invoices, extract vendor/amount/date using OCR+AI, match with PO in Excel, flag discrepancies, log to Sheets automatically.</div>
+      <div class="tag-list"><span class="tag hot">HIGH IMPACT</span><span class="tag">Python</span><span class="tag">OCR</span><span class="tag">AI</span></div>
+    </div>
+    <div class="card" style="--card-accent:#7c3aed;">
+      <span class="card-icon">📈</span>
+      <div class="card-title">Sales Dashboard Auto-Refresh</div>
+      <div class="card-desc">Connect Power BI directly to your CRM/ERP, set scheduled refresh, distribute auto-generated PDF report to management WhatsApp group at EOD.</div>
+      <div class="tag-list"><span class="tag">Power BI</span><span class="tag">Power Automate</span><span class="tag">API</span></div>
+    </div>
+    <div class="card" style="--card-accent:#f59e0b;">
+      <span class="card-icon">🏦</span>
+      <div class="card-title">Bank Reconciliation Bot</div>
+      <div class="card-desc">Download bank statement, compare with ledger entries in Tally/ERP export, highlight unmatched transactions, generate reconciliation sheet.</div>
+      <div class="tag-list"><span class="tag">Python</span><span class="tag">Pandas</span><span class="tag">Excel</span></div>
+    </div>
+    <div class="card" style="--card-accent:#ec4899;">
+      <span class="card-icon">📑</span>
+      <div class="card-title">HR Attendance MIS</div>
+      <div class="card-desc">Pull biometric data via API, calculate OT/late marks/absences, generate department-wise attendance report, flag exceptions to managers via email.</div>
+      <div class="tag-list"><span class="tag">Python</span><span class="tag">API</span><span class="tag">Apps Script</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SECTION: ROADMAP ============ -->
+<div class="section" id="roadmap">
+  <div class="section-header container">
+    <div class="section-title">🗺️ MIS Automation Learning Roadmap</div>
+    <div class="section-desc">// from zero to enterprise automation architect</div>
+  </div>
+
+  <div class="tip-box container">
+    <span class="tip-icon">💡</span>
+    <div class="tip-text"><strong>Strategy:</strong> Don't learn everything at once. Pick ONE real problem at your company, automate it using Phase 1 tools, show the business impact, then expand. Results get you a seat at the decision table faster than certifications.</div>
+  </div>
+
+  <div class="roadmap container">
+
+    <div class="roadmap-phase">
+      <div class="phase-label" style="border-top: 2px solid #00e5ff;">
+        <span class="phase-num" style="color:#00e5ff;">01</span>
+        <span class="phase-name">Foundation</span>
+        <span class="phase-duration">4–8 weeks</span>
+      </div>
+      <div class="phase-content">
+        <h3>Build the Core</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Master the fundamentals that unlock everything else. Focus: Python basics, Excel/Sheets automation, SQL queries.</p>
+        <div class="skill-items">
+          <div class="skill-item"><span class="skill-dot" style="background:#00e5ff"></span>Python Basics (variables, loops, functions)</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#00e5ff"></span>Pandas for data manipulation</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#00e5ff"></span>openpyxl / xlsxwriter</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#00e5ff"></span>SQL SELECT, JOIN, GROUP BY</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#00e5ff"></span>Google Apps Script basics</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#00e5ff"></span>VBA Macro recording + editing</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="roadmap-phase">
+      <div class="phase-label" style="border-top: 2px solid #f59e0b;">
+        <span class="phase-num" style="color:#f59e0b;">02</span>
+        <span class="phase-name">Web Automation</span>
+        <span class="phase-duration">4–6 weeks</span>
+      </div>
+      <div class="phase-content">
+        <h3>Automate Portals & Data Collection</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Learn to control browsers programmatically — login to portals, download files, fill forms, scrape reports.</p>
+        <div class="skill-items">
+          <div class="skill-item"><span class="skill-dot" style="background:#f59e0b"></span>Selenium WebDriver</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#f59e0b"></span>Playwright (Python)</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#f59e0b"></span>requests + BeautifulSoup</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#f59e0b"></span>REST API consumption</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#f59e0b"></span>Handling login sessions & cookies</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#f59e0b"></span>Scheduled jobs (cron / schedule lib)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="roadmap-phase">
+      <div class="phase-label" style="border-top: 2px solid #ff6b35;">
+        <span class="phase-num" style="color:#ff6b35;">03</span>
+        <span class="phase-name">Document AI</span>
+        <span class="phase-duration">3–4 weeks</span>
+      </div>
+      <div class="phase-content">
+        <h3>Automate Bills, PDFs & Invoices</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Extract structured data from unstructured documents — the core of accounts, procurement, and compliance automation.</p>
+        <div class="skill-items">
+          <div class="skill-item"><span class="skill-dot" style="background:#ff6b35"></span>PyMuPDF / pdfplumber</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#ff6b35"></span>Tesseract OCR + pytesseract</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#ff6b35"></span>OpenCV image preprocessing</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#ff6b35"></span>LLM APIs for smart extraction</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#ff6b35"></span>python-docx for Word automation</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#ff6b35"></span>reportlab / fpdf for PDF generation</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="roadmap-phase">
+      <div class="phase-label" style="border-top: 2px solid #10b981;">
+        <span class="phase-num" style="color:#10b981;">04</span>
+        <span class="phase-name">Dashboards</span>
+        <span class="phase-duration">4–6 weeks</span>
+      </div>
+      <div class="phase-content">
+        <h3>Build Decision-Maker Dashboards</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Transform raw data into executive dashboards. This is where you become irreplaceable to management.</p>
+        <div class="skill-items">
+          <div class="skill-item"><span class="skill-dot" style="background:#10b981"></span>Power BI (DAX, relationships, slicers)</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#10b981"></span>Streamlit for Python web dashboards</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#10b981"></span>Plotly / Matplotlib charts</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#10b981"></span>Google Data Studio / Looker Studio</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#10b981"></span>KPI design principles</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#10b981"></span>Automated PDF report dispatch</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="roadmap-phase">
+      <div class="phase-label" style="border-top: 2px solid #7c3aed;">
+        <span class="phase-num" style="color:#a78bfa;">05</span>
+        <span class="phase-name">Enterprise Scale</span>
+        <span class="phase-duration">Ongoing</span>
+      </div>
+      <div class="phase-content">
+        <h3>Build Systems, Not Just Scripts</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Move from one-off automations to reliable, monitored, scalable enterprise systems that run 24/7.</p>
+        <div class="skill-items">
+          <div class="skill-item"><span class="skill-dot" style="background:#a78bfa"></span>n8n / Apache Airflow workflows</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#a78bfa"></span>FastAPI for internal APIs</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#a78bfa"></span>PostgreSQL / MySQL database design</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#a78bfa"></span>Docker for deployment</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#a78bfa"></span>Error handling & alerting systems</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#a78bfa"></span>Git version control</div>
+          <div class="skill-item"><span class="skill-dot" style="background:#a78bfa"></span>AI integration for smart automation</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ SECTION: MIS STACK ============ -->
+<div class="section" id="stack">
+  <div class="section-header container">
+    <div class="section-title">🏗️ The Complete MIS Automation Stack</div>
+    <div class="section-desc">// your full technology architecture by layer</div>
+  </div>
+
+  <div class="card-grid container">
+
+    <div class="card" style="--card-accent:#00e5ff;">
+      <span class="card-icon">📥</span>
+      <div class="card-subtitle">Layer 1 — Data Ingestion</div>
+      <div class="card-title">Getting Data In</div>
+      <div class="card-desc">Collect data from any source: portals, emails, forms, APIs, ERPs, PDFs, WhatsApp messages, biometric systems, IoT sensors.</div>
+      <div class="tag-list">
+        <span class="tag">Selenium</span><span class="tag">Playwright</span><span class="tag">requests</span>
+        <span class="tag">IMAP/Gmail API</span><span class="tag">Google Forms</span><span class="tag">ERP APIs</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:#f59e0b;">
+      <span class="card-icon">🔄</span>
+      <div class="card-subtitle">Layer 2 — ETL Pipeline</div>
+      <div class="card-title">Clean, Transform, Load</div>
+      <div class="card-desc">Process raw data: clean duplicates, standardize formats, merge from multiple sources, validate, and load into a central store.</div>
+      <div class="tag-list">
+        <span class="tag">Python Pandas</span><span class="tag">Power Query</span><span class="tag">SQL</span>
+        <span class="tag">OpenRefine</span><span class="tag">Apache Airflow</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:#ff6b35;">
+      <span class="card-icon">🗄️</span>
+      <div class="card-subtitle">Layer 3 — Data Store</div>
+      <div class="card-title">Where Data Lives</div>
+      <div class="card-desc">Structured central repository for all enterprise data — queryable, reliable, the single source of truth for all dashboards and reports.</div>
+      <div class="tag-list">
+        <span class="tag">PostgreSQL</span><span class="tag">MySQL</span><span class="tag">SQLite</span>
+        <span class="tag">Google Sheets</span><span class="tag">Excel Data Model</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:#10b981;">
+      <span class="card-icon">⚙️</span>
+      <div class="card-subtitle">Layer 4 — Business Logic</div>
+      <div class="card-title">Rules, Alerts, Calculations</div>
+      <div class="card-desc">Business rules engine: calculate KPIs, trigger alerts on thresholds, run reconciliation checks, flag anomalies, auto-generate summaries.</div>
+      <div class="tag-list">
+        <span class="tag">Python Scripts</span><span class="tag">SQL Views</span><span class="tag">Apps Script</span>
+        <span class="tag">Power Automate</span><span class="tag">n8n Flows</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:#7c3aed;">
+      <span class="card-icon">📊</span>
+      <div class="card-subtitle">Layer 5 — Presentation</div>
+      <div class="card-title">Dashboards & Reports</div>
+      <div class="card-desc">Visual layer for management: live dashboards, auto-emailed PDF reports, WhatsApp summaries, Slack/Teams alerts, Excel pivot reports.</div>
+      <div class="tag-list">
+        <span class="tag">Power BI</span><span class="tag">Streamlit</span><span class="tag">Looker Studio</span>
+        <span class="tag">Plotly</span><span class="tag">Email Reports</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:#ec4899;">
+      <span class="card-icon">🤖</span>
+      <div class="card-subtitle">Layer 6 — AI Augmentation</div>
+      <div class="card-title">Smart Automation</div>
+      <div class="card-desc">Add intelligence: OCR on bills, NLP on emails, anomaly detection on data, AI-powered data extraction from unstructured text, chatbot for data queries.</div>
+      <div class="tag-list">
+        <span class="tag hot">FUTURE</span>
+        <span class="tag">Tesseract OCR</span><span class="tag">Claude API</span>
+        <span class="tag">scikit-learn</span><span class="tag">LangChain</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:#06b6d4;">
+      <span class="card-icon">🔒</span>
+      <div class="card-subtitle">Layer 7 — Operations</div>
+      <div class="card-title">Reliability & Access Control</div>
+      <div class="card-desc">Keep automation running reliably: schedule jobs, monitor failures, send error alerts, manage user access, audit logs, version control scripts.</div>
+      <div class="tag-list">
+        <span class="tag">Windows Task Scheduler</span><span class="tag">Cron</span>
+        <span class="tag">Git</span><span class="tag">Email Alerts</span><span class="tag">Logging</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ SECTION: SNIPPETS ============ -->
+<div class="section" id="snippets">
+  <div class="section-header container">
+    <div class="section-title">💾 Starter Code Snippets</div>
+    <div class="section-desc">// copy-paste ready templates for common MIS tasks</div>
+  </div>
+
+  <div class="card-grid container">
+
+    <div class="card" style="--card-accent:#00e5ff; grid-column: span 1;">
+      <div class="card-subtitle">Python — Portal Login & Download</div>
+      <div class="card-title">Auto-Download Report from Portal</div>
+      <div class="code-block" data-lang="PYTHON">
+        <code><span class="code-kw">from</span> playwright.sync_api <span class="code-kw">import</span> sync_playwright
+<span class="code-kw">import</span> pandas <span class="code-kw">as</span> pd
+
+<span class="code-kw">with</span> sync_playwright() <span class="code-kw">as</span> p:
+    browser = p.chromium.launch()
+    page = browser.new_page()
+    
+    <span class="code-cm"># Login to portal</span>
+    page.goto(<span class="code-str">"https://yourportal.com/login"</span>)
+    page.fill(<span class="code-str">"#username"</span>, <span class="code-str">"your_user"</span>)
+    page.fill(<span class="code-str">"#password"</span>, <span class="code-str">"your_pass"</span>)
+    page.click(<span class="code-str">"#login-btn"</span>)
+    
+    <span class="code-cm"># Navigate to report & download</span>
+    page.goto(<span class="code-str">"https://yourportal.com/reports"</span>)
+    <span class="code-kw">with</span> page.expect_download() <span class="code-kw">as</span> dl:
+        page.click(<span class="code-str">"#export-excel"</span>)
+    dl.value.save_as(<span class="code-str">"report.xlsx"</span>)
+    browser.close()</code>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:#f59e0b; grid-column: span 1;">
+      <div class="card-subtitle">Python — OCR Invoice Reader</div>
+      <div class="card-title">Extract Data from Scanned Bill</div>
+      <div class="code-block" data-lang="PYTHON">
+        <code><span class="code-kw">import</span> pytesseract, cv2
+<span class="code-kw">from</span> PIL <span class="code-kw">import</span> Image
+<span class="code-kw">import</span> re
+
+<span class="code-kw">def</span> <span class="code-fn">extract_invoice_data</span>(image_path):
+    img = cv2.imread(image_path)
+    <span class="code-cm"># Preprocess for better OCR</span>
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    thresh = cv2.threshold(gray, 150, 255,
+              cv2.THRESH_BINARY)[1]
+    
+    text = pytesseract.image_to_string(thresh)
+    
+    <span class="code-cm"># Extract key fields with regex</span>
+    amount = re.search(<span class="code-str">r'Total[:\s]+₹?([\d,]+)'</span>, text)
+    date   = re.search(<span class="code-str">r'\d{2}/\d{2}/\d{4}'</span>, text)
+    gstin  = re.search(<span class="code-str">r'[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]'</span>, text)
+    
+    <span class="code-kw">return</span> {
+        <span class="code-str">'amount'</span>: amount.group(1) <span class="code-kw">if</span> amount <span class="code-kw">else</span> <span class="code-str">''</span>,
+        <span class="code-str">'date'</span>:   date.group()   <span class="code-kw">if</span> date   <span class="code-kw">else</span> <span class="code-str">''</span>,
+        <span class="code-str">'gstin'</span>:  gstin.group()  <span class="code-kw">if</span> gstin  <span class="code-kw">else</span> <span class="code-str">''</span>,
+    }</code>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:#10b981; grid-column: span 1;">
+      <div class="card-subtitle">Apps Script — Auto Email on Sheet Change</div>
+      <div class="card-title">Trigger Email Alert from Google Sheets</div>
+      <div class="code-block" data-lang="APPS SCRIPT">
+        <code><span class="code-cm">// Runs on every edit — set as trigger</span>
+<span class="code-kw">function</span> <span class="code-fn">onEdit</span>(e) {
+  <span class="code-kw">const</span> sheet = e.source.getActiveSheet();
+  <span class="code-kw">const</span> range = e.range;
+  
+  <span class="code-cm">// Watch column D (Status)</span>
+  <span class="code-kw">if</span> (range.getColumn() === 4 &&
+      e.value === <span class="code-str">"APPROVED"</span>) {
+    
+    <span class="code-kw">const</span> row = range.getRow();
+    <span class="code-kw">const</span> vendor = sheet.getRange(row, 1).getValue();
+    <span class="code-kw">const</span> amount = sheet.getRange(row, 3).getValue();
+    
+    MailApp.sendEmail({
+      to: <span class="code-str">"accounts@company.com"</span>,
+      subject: <span class="code-str">`PO Approved: ${vendor}`</span>,
+      body: <span class="code-str">`Amount: ₹${amount}\nApproved in MIS sheet.`</span>
+    });
+  }
+}</code>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:#7c3aed; grid-column: span 1;">
+      <div class="card-subtitle">Python — Auto MIS Report Email</div>
+      <div class="card-title">Schedule & Send Daily Report</div>
+      <div class="code-block" data-lang="PYTHON">
+        <code><span class="code-kw">import</span> schedule, time, smtplib
+<span class="code-kw">import</span> pandas <span class="code-kw">as</span> pd
+<span class="code-kw">from</span> email.mime.multipart <span class="code-kw">import</span> MIMEMultipart
+<span class="code-kw">from</span> email.mime.base <span class="code-kw">import</span> MIMEBase
+
+<span class="code-kw">def</span> <span class="code-fn">send_daily_mis</span>():
+    <span class="code-cm"># 1. Pull data from DB / ERP</span>
+    df = pd.read_sql(<span class="code-str">"SELECT * FROM daily_kpi"</span>, conn)
+    
+    <span class="code-cm"># 2. Export to Excel</span>
+    df.to_excel(<span class="code-str">"MIS_Report.xlsx"</span>, index=<span class="code-kw">False</span>)
+    
+    <span class="code-cm"># 3. Email to management</span>
+    msg = MIMEMultipart()
+    msg[<span class="code-str">'Subject'</span>] = <span class="code-str">"Daily MIS Report"</span>
+    msg[<span class="code-str">'To'</span>] = <span class="code-str">"mgmt@company.com"</span>
+    <span class="code-cm"># attach MIS_Report.xlsx ...</span>
+    
+    <span class="code-kw">print</span>(<span class="code-str">"MIS Report sent ✓"</span>)
+
+<span class="code-cm"># Run every day at 9:00 AM</span>
+schedule.every().day.at(<span class="code-str">"09:00"</span>).do(send_daily_mis)
+<span class="code-kw">while True</span>: schedule.run_pending(); time.sleep(60)</code>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tip-box container">
+    <span class="tip-icon">🚀</span>
+    <div class="tip-text"><strong>Where to learn for FREE:</strong> Python → freeCodeCamp YouTube | Google Apps Script → developers.google.com/apps-script | Power BI → Microsoft Learn | Selenium → official docs | SQL → sqlzoo.net | All Python libs → PyPI.org + real Python.com. Start with Python basics on <strong>replit.com</strong> — zero setup needed.</div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    MIS Enterprise Automation Toolkit &nbsp;·&nbsp; Built for MIS Executives &nbsp;·&nbsp; 2025<br>
+    <span style="color:#00e5ff; margin-top:6px; display:block;">Automate Everything. Own the Data. Lead the Decisions.</span>
+  </div>
+</footer>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('visible');
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>
