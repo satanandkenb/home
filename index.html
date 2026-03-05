@@ -568,7 +568,17 @@
       // Fallback: apply stored or default theme even if toggle is missing
       applyTheme(getStoredTheme());
     }
-
+    // Scroll Reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    revealEls.forEach(el => observer.observe(el));
     // Resume Download Button Handler
     const resumeDownloadBtn = document.querySelector(".resume__btn");
     if (resumeDownloadBtn) {
@@ -588,6 +598,7 @@
 
 
 </html>
+
 
 
 
