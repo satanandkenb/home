@@ -97,16 +97,6 @@
     title="Click here to hire me via WhatsApp.">
     <img src="images/whatsapp.png" class="social-icons">
   </a>
-  
-  <!-- Scrolling Road Path Animation -->
-  <div class="scroll-path">
-    <svg class="scroll-path__line" viewBox="0 0 2 100" preserveAspectRatio="none">
-      <path d="M 1 0 L 1 100" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="4 4" />
-    </svg>
-    <div class="scroll-path__marker" id="scrollMarker">
-      <div class="scroll-path__dot"></div>
-    </div>
-  </div>
 
   <header class="nav">
     <div class="nav__logo">SATA<span>NAND</span></div>
@@ -579,76 +569,6 @@
       applyTheme(getStoredTheme());
     }
 
-    // Scroll reveal animations
-    const revealElements = document.querySelectorAll(".reveal");
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            // Uncomment the next line if you want repeating animations
-            // observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        threshold: 0.15,
-        rootMargin: "0px 0px -40px 0px",
-      }
-    );
-
-    revealElements.forEach((el) => observer.observe(el));
-
-    // Scrolling Road Path Animation
-    const scrollMarker = document.getElementById("scrollMarker");
-    const scrollPath = document.querySelector(".scroll-path");
-
-    function updateScrollPath() {
-      if (!scrollMarker || !scrollPath) return;
-
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-      // Calculate scroll percentage (0 to 1)
-      const scrollPercentage = scrollTop / (documentHeight - windowHeight);
-
-      // Calculate position (0% to 100% of path height)
-      const pathHeight = scrollPath.offsetHeight;
-      const markerPosition = scrollPercentage * (pathHeight - 20); // -20 to account for marker size
-
-      // Update marker position
-      scrollMarker.style.transform = `translateY(${markerPosition}px)`;
-
-      // Update path line stroke-dashoffset for animated effect
-      const pathLine = document.querySelector(".scroll-path__line path");
-      if (pathLine) {
-        const dashLength = 4;
-        const dashGap = 4;
-        const totalDash = dashLength + dashGap;
-        pathLine.style.strokeDashoffset = -(scrollPercentage * pathHeight * (totalDash / 2));
-      }
-    }
-
-    // Update on scroll
-    let ticking = false;
-    window.addEventListener("scroll", () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          updateScrollPath();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    });
-
-    // Initial update
-    updateScrollPath();
-
-    // Update on resize
-    window.addEventListener("resize", updateScrollPath);
-
     // Resume Download Button Handler
     const resumeDownloadBtn = document.querySelector(".resume__btn");
     if (resumeDownloadBtn) {
@@ -668,6 +588,7 @@
 
 
 </html>
+
 
 
 
